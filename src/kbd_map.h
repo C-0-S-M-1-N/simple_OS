@@ -1,5 +1,6 @@
 #ifndef _KEY_MAP_
 #define _KEY_MAP_
+#include "include/stdio.cpp"
 
 char _codeToASCII[] = {
 0, //NULL BIT
@@ -49,6 +50,8 @@ bool L_SHIFT = 0, L_CTRL = 0, L_ALT = 0;
 bool Fs[13] = {0,0,0,0,0,0,0,0,0,0,0,0};
 //locks
 bool capsLock = 0, numLock = 0, scrollLock = 0;
+
+bool kbd_keys[256];
 
 char toUpper(char x){
 	if(x >= 'a' && x<='z') return x-32;
@@ -120,9 +123,16 @@ unsigned char getChar(unsigned int keycode){
 			R_ALT = 0;
 			break;
 		default:{
-			if(keycode > sizeof(_codeToASCII)) return 0;
+			if(keycode > 128){
+				char c = _codeToASCII[keycode-0x80];
+				if(L_SHIFT || R_SHIFT) c = toUpper(c);
+				kbd_keys[c] = 0;
+				//printf((unsigned char)c);
+				//printf(" was released \0");
+			}
 			char c = _codeToASCII[keycode];
-			if(L_SHIFT || R_SHIFT) return toUpper(c);
+			if(L_SHIFT || R_SHIFT) c = toUpper(c);
+			kbd_keys[c] = 1;
 			return c;
 			break;	
 		}
