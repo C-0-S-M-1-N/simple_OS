@@ -52,6 +52,8 @@ bool Fs[13] = {0,0,0,0,0,0,0,0,0,0,0,0};
 bool capsLock = 0, numLock = 0, scrollLock = 0;
 
 bool kbd_keys[256];
+bool keyPress = 0;
+
 
 char toUpper(char x){
 	if(x >= 'a' && x<='z') return x-32;
