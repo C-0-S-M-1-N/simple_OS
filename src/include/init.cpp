@@ -7,6 +7,8 @@ extern unsigned char* BASE;
 
 
 void init(){
+	hs[hs_s].ptr = (void*)0x91000;
+	hs[hs_s++].size = 1;
 	BASE = (unsigned char*)0xb8000;
 	ioport_out(0x3D4, 0x0A);
 	ioport_out(0x3D5, 0x20);

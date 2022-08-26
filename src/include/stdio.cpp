@@ -15,7 +15,6 @@ typedef __builtin_va_list va_list;
 
 unsigned char *BASE = 0;
 
-namespace std{
 
 int __msb__(size_t n, bool pos = 0){
 	n |= (n >> 1);
@@ -54,25 +53,6 @@ float log2(float x){
 }
 
 int _X_ = 0, _Y_ = 0;
-
-/*void printf(const char *str, int n, ...){
-	va_list v;
-	BASE[_Y_*80*2+_X_] = 0x00;
-	BASE[_Y_*80*2+_X_] = 0;
-	while(*str){
-		switch(*str){
-			case '\n':
-				_X_ = 0;
-				_Y_++;
-				break;
-			case '\t':
-				_X_ += 4;
-				break;
-			case '\b':
-
-		}
-	}
-}*/
 
 void memoryWrite__(unsigned char s, int color = 0x0f){
 	switch(s){
@@ -125,6 +105,7 @@ void printfNum__(int x, int color = 0x0f){
 		memoryWrite__('0', color);
 	}
 	bool neg = x<0;
+	if(neg) x *= -1;
 	char str[10], buff[10];
 	int p = 0;
 	while(x > 0){
@@ -188,8 +169,8 @@ void printf(const char *str, ...){
 				case 'x':{
 					int64_t n = va_arg(l, int64_t);
 					char hn[9];
-					int p = __msb__(n, 1)/8+1;
-					hn[p] = '\0';
+					int p = __msb__(n, 1)/8+2;
+					hn[p+1] = '\0';
 					while(n){
 						hn[p--] = (n%16)>=10? 'A'+((n%16)-10) : (n%16)+'0';
 						n >>= 4;
@@ -200,6 +181,10 @@ void printf(const char *str, ...){
 					char c = va_arg(l, int);
 					memoryWrite__(c);
 					break;}
+				case 'p':{
+					void* ptr = va_arg(l, void*);
+					printf("%x", ptr);
+					break;}
 
 			}
 			str++;
@@ -209,33 +194,7 @@ void printf(const char *str, ...){
 	BASE[_Y_*80*2+_X_+1] = 0xff;
 	
 
-}/*
-
-
-void printf(int x, int color = 0x0f){
-	if(x == 0){
-		printf("0\0");
-	}
-	char str[10], buff[10];
-	int p = 0;
-	while(x > 0){
-		str[p++] = (x%10)+'0';
-		x /= 10;
-	}
-	str[p--] = '\0';
-	int p2 = 0;
-	while(p >= 0){
-		buff[p2++] = str[p--];
-	}
-	buff[p2++] = 0;
-	printf(buff, color);
 }
-void printf(unsigned char x, int color = 0x0f){
-	char str[2];
-	str[0] = x;
-	str[1] = 0;
-	printf(str, color);
-}*/
 
 template <class T>void swap(T &a, T &b){
 	T aux = a;
@@ -243,40 +202,60 @@ template <class T>void swap(T &a, T &b){
 	b = aux;
 }
 
-//return the size in the alocated memory block
-size_t getSize(uint8_t *ptr){
-	
-}
 
+//holder struct:
+//	void* pointer to the block
+//	size_t size of the block
+//
+//hs* = 0x90001(holder)
+//
+//malloc(){
+//	sort(hs); //we can use bubble sort since it will only be one itteration
+//	for(i : sorts){
+//		if i+1.pointer - (i.pointer+i.size) >= size: allocate
+//	}
+//	allocate hs.last()+size
+//
+//}
 
-//sets the size for the bits to be read by getSize();
-void setSize(uint8_t *ptr, size_t size){
-	*ptr = 128;
-	ptr++;
-	size_t *s = (size_t*)ptr;
-	*s = size;
-}
-struct _data{
-	uint8_t* ptr;
-	size_t size;
-};
+struct mem_hld{
+	void* ptr;
+	size_t size{0};
+} *hs = (mem_hld*)0x90001;
 
-_data *dptr = (_data*)0x90001; // 1'000'000
-size_t dps = 0;
+size_t hs_s = 0;
 
-//0x460902
+//start: 0x91000
 void* malloc(size_t bytes){
-	for(size_t i = 0; i<dps-1; i++){
-		if((dptr[i+1].ptr + dptr[i+1].size) - (dptr[i].ptr + dptr[i].size) >= bytes){
-			uint8_t *p = (uint8_t*)dptr[i].ptr+dptr[i].size;
-			dptr[dps++].ptr = p;
-			dptr[dps].size = bytes;
-			//sort(dptr, 0, dps);
-			return p;
+	void* ret = nullptr;
+//sort
+	for(size_t i = 0; i<hs_s - 1; i++){
+		if(hs[i].ptr > hs[i+1].ptr) swap(hs[i], hs[i+1]);
+		if(!ret){
+			if((uint8_t*)hs[i+1].ptr - ((uint8_t*)hs[i].ptr+hs[i].size) >= bytes){
+				ret = (uint8_t*)hs[i].ptr+hs[i].size;
+				hs[hs_s].ptr = ret;
+				hs[hs_s++].size = bytes;
+			}
 		}
 	}
-	return nullptr;
+	if(ret) return ret;	
+
+	ret = (uint8_t*)hs[hs_s-1].ptr+hs[hs_s-1].size;
+	hs[hs_s].ptr = ret;
+	hs[hs_s++].size = bytes;	
+	return ret;
 }
 
-};
+void free(void* ptr){
+	int i = 0, j = hs_s-1, m;
+	while(i<j){
+		m = (i+j)/2;
+		if(ptr < hs[m].ptr) j = m-1;
+		else if(ptr > hs[m].ptr) i = m+1;
+		else break; 
+	}
+	for(i = m; i<hs_s-1; i++) swap(hs[i], hs[i+1]);
+	hs_s--;
+}
 #endif
