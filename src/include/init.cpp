@@ -5,6 +5,13 @@
 extern unsigned char* BASE;
 #define CURSOR '\n'
 
+typedef short int16_t;
+typedef unsigned short uint16_t;
+
+#define inb(p) ioport_in(p)
+#define outb(p, a) ioport_out(p, a)
+
+uint32_t RAM_SIZE = 0;
 
 void init(){
 	hs[hs_s].ptr = (void*)0x91000;
@@ -16,5 +23,17 @@ void init(){
 	idt_init();
 	kbd_init();
 	enable_interrupts();
+	
+	//TODO
+	uint8_t up, down;
+	
+	outb(0x70, 0x30);
+	down = inb(0x71);
+
+	outb(0x70, 0x31);
+	up = inb(0x71);
+	
+
+	RAM_SIZE = down | up << 8;
 }
 #endif
