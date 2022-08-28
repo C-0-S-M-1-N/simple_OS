@@ -67,6 +67,8 @@ char toUpper(char x){
 	if(x == '.') return '>';
 	if(x == '/') return '?';
 	if(x == '\\') return '|'; 	
+	if(x == '[') return '{';
+	if(x == ']') return '}';
 	return x;	
 }
 

@@ -130,7 +130,7 @@ void printf(const char *str, ...){
 	BASE[_Y_*80*2+_X_] = 0;
 	BASE[_Y_*80*2+_X_+1] = 0x00;
 	va_list l;
-	__builtin_va_start(l, 20);
+	__builtin_va_start(l, str);
 	while(*str){
 		if(*str == '%' && *(str+1)){
 			str++;
@@ -258,4 +258,16 @@ void free(void* ptr){
 	for(i = m; i<hs_s-1; i++) swap(hs[i], hs[i+1]);
 	hs_s--;
 }
+
+bool strcmp(const char *s1, const char *s2){
+	while(*s1 && *s2){
+		if(*s1 != *s2) return false;
+		s1++, s2++;
+		if((s1 && !s2) || (!s1 && s2)) return false;
+	}
+	return true;
+}
+
+
+
 #endif
