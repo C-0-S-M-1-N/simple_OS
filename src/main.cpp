@@ -7,13 +7,14 @@ extern unsigned char *BASE;
 
 bool writeToScreen = 0;
 
+
 //z+5
 extern "C" void start(){
 	
 	init();
 	writeToScreen = 1;
 	folder root("-");
-
+	int *a, *b, *c;
 	for(size_t i = 0; i<hs_s; i++) printf("%x %d, ", (int64_t)hs[i].ptr, hs[i].size);
 
 	return;
