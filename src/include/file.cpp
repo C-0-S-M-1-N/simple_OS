@@ -1,55 +1,95 @@
-#ifndef FILES__
-#define FILES__
+#ifndef _FILESYSTEM__
+#define _FILESYSTEM__
 #include "stdio.cpp"
 
 struct file{
 	int c, h, s;
-	const char *name;
+	size_t size;
+	char *name;
 };
 
-class folder{
+class dir{
+	const char*	name;
+		int 	sd_s = 0, f_s = 0;
+		dir**	subdir;
+		file*	files;
 public:
-	size_t folderPtr = 0, filePtr = 0;
-	const char *name = "-";
-	folder 	*prev = nullptr;	//pointer
-	folder **next = nullptr;	//array
-	file   **files = nullptr;	//array
-public:
-	folder(const char *n): name{n}{
-		next = (folder**)malloc(sizeof(folder*)*5);
-		files = (file**)malloc(sizeof(file*)*10);
-	}
-	folder* goDown(const char *n){
-		for(size_t i = 0; i<folderPtr; i++){
-			if(strcmp(n, next[i]->name)){
-				next[i]->prev = this;
-				return next[i];
-			}
-		}
-		return nullptr;
-	}
-	folder* goUp(void){
-		return this->prev;
+	dir*	prev;
+	dir(const char* n): name{n}{
+		subdir = (dir**)	malloc(5*sizeof(dir*));
+		files  = (file*)	malloc(10*sizeof(file));
+		prev = nullptr;	
 	}
 
-	void addFolder(folder& f){
-		if(folderPtr+1 > sizeof(next)/sizeof(folder*))
-		next[folderPtr++] = &f;
+	dir(dir& d) = default;
+	dir& operator =(const dir& d){
+		name = d.name;
+		sd_s = d.sd_s;
+		f_s = d.f_s;
+		subdir = d.subdir;
+		files = d.files;
+		prev = d.prev;	
+		return *this;
 	}
+	//dir& operator =(const dir&) = default;
 
-	void addFile(file& f){
-		files[filePtr++] = &f;
-	}
+	void touch(file);
+	bool rm(const char*);
+	void mkdir(dir&);
+	bool rmdir(const char*);
 	
-	void listElem(){ //TODO: add color descriptions
-		for(int i = 0; i<filePtr; i++) printf("%s\n", files[i]->name);
-		for(int i = 0; i<folderPtr; i++) printf("%s\n", next[i]->name);
-	}
+	dir* cd(const char*);
 
-	~folder(){
-		free(next);
+	const char* getName() const{ return name;}
+
+	~dir(){
+		free(subdir);
 		free(files);
 	}
 };
+
+file makeFile();
+void freeFile();
+
+void dir::touch(file f){
+	if(f_s+1 > sizeof(files)){ files = (file*)realloc(files, sizeof(files)+sizeof(file)*5);}	
+	files[f_s++] = f;
+}
+
+bool dir::rm(const char *n){
+	for(size_t i = 0; i<f_s; i++){
+		if(strcmp(n, files[f_s].name)){
+			for(size_t j = i; j<f_s-1; j++) swap(files[j], files[j+1]);		
+			f_s--;
+			return true;
+		}
+	}
+	return false;
+}
+
+void dir::mkdir(dir &d){
+	if(sd_s+1 > sizeof(subdir)){ subdir = (dir**)realloc(subdir, sizeof(subdir)+sizeof(dir*)*5);}	
+	subdir[sd_s++] = &d;
+	subdir[sd_s-1]->prev = this;
+}
+
+bool dir::rmdir(const char *n){
+	for(size_t i = 0; i<sd_s; i++){
+		if(strcmp(n, subdir[i]->name)){
+			for(size_t j = i; j<sd_s-1; j++) swap(subdir[j], subdir[j+1]);
+			sd_s--;
+			return true;
+		}
+	}
+	return false;	
+}
+
+dir* dir::cd(const char* n){
+	if(strcmp(n, "..")) return prev;
+	for(size_t i = 0; i<sd_s; i++){ if(strcmp(n, subdir[i]->name)){
+		return subdir[i];
+	} }
+	return nullptr;
+}
 
 #endif

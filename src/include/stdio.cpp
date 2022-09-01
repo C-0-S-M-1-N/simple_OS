@@ -317,7 +317,7 @@ void* realloc(void* ptr, size_t rsize){
 	}
 	
 	void *buff = malloc(rsize);
-	ptr = memmove(ptr, buff, hs[m].size);
+	memmove(ptr, buff, hs[m].size);
 	free(ptr);
 	return buff;
 }

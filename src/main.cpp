@@ -13,9 +13,20 @@ extern "C" void start(){
 	
 	init();
 	writeToScreen = 1;
-	folder root("-");
-	int *a, *b, *c;
-	for(size_t i = 0; i<hs_s; i++) printf("%x %d, ", (int64_t)hs[i].ptr, hs[i].size);
+	dir root("-");
+	dir aux("aux");
+	root.mkdir(aux);
+
+	printf("%s\n", root.getName());
+	
+	root = *root.cd("aux");
+
+	printf("%s\n", root.getName());
+
+	root = *root.prev;
+	//printf("da\n");
+	printf("%s\n", root.prev->getName());
+	//for(size_t i = 0; i<hs_s; i++) printf("%x %d, ", (int64_t)hs[i].ptr, hs[i].size);
 
 	return;
 }
