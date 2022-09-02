@@ -8,12 +8,52 @@ struct file{
 	char *name;
 };
 
+class string{
+	char* str;
+	size_t s, allS = 0;;
+public:
+	string(){
+		allS = 50;
+		str = (char*)malloc(allS*sizeof(char));
+		s = 0;
+	}
+	char& operator [](size_t i){return str[i];}
+	void push_back(char c){
+		if(s+1 > allS){
+			allS += 50;
+			str = (char*)realloc(str, allS*sizeof(char));
+		}
+		str[s++] = c;
+	}
+	void pop_back(){if(s) s--;}
+
+	string& operator +(string a){
+		while(s < a.s){ this->push_back(a[s]);}
+		return *this;
+	}
+
+	string& operator +(const char* n){
+		while(*n){ this->push_back(*n++);}
+		return *this;
+	}
+	char back(){ return str[s-1];}
+	char front(){ return *str;}
+
+	char* c_str(){
+		char *r = str;
+		r[s] = 0;
+		return r;
+	}
+};
+
+
 class dir{
 	const char*	name;
 		int 	sd_s = 0, f_s = 0;
 		dir**	subdir;
 		file*	files;
 public:
+
 	dir*	prev;
 	dir(const char* n): name{n}{
 		subdir = (dir**)	malloc(5*sizeof(dir*));
@@ -31,6 +71,7 @@ public:
 		prev = d.prev;	
 		return *this;
 	}
+
 	//dir& operator =(const dir&) = default;
 
 	void touch(file);
@@ -85,11 +126,15 @@ bool dir::rmdir(const char *n){
 }
 
 dir* dir::cd(const char* n){
-	if(strcmp(n, "..")) return prev;
+	if(strcmp(n, "..")) {
+				
+		return prev;
+	}
 	for(size_t i = 0; i<sd_s; i++){ if(strcmp(n, subdir[i]->name)){
 		return subdir[i];
 	} }
-	return nullptr;
+	return this;
 }
+
 
 #endif
