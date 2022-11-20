@@ -75,11 +75,11 @@ start_protected_mode:
 	mov gs, ax
 	mov ebp, 0x90000
 	mov esp, ebp
-	
 	jmp KERNEL_LOCATION
 
 
 jmp $
+
 
 times 510-($-$$) db 0
 db 0x55, 0xaa

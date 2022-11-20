@@ -1,7 +1,7 @@
 #ifndef _KBD_H_
 #define _KBD_H_
 #include "../kbd.cpp"
-#include "stdio.cpp"
+#include "../stdio.hpp"
 extern unsigned char* BASE;
 #define CURSOR '\n'
 
@@ -11,7 +11,11 @@ typedef unsigned short uint16_t;
 #define inb(p) ioport_in(p)
 #define outb(p, a) ioport_out(p, a)
 
+
+extern bool writeToScreen;
 uint32_t RAM_SIZE = 0;
+
+extern char charGet;
 
 void init(){
 	hs[hs_s].ptr = (void*)0x91000;
@@ -24,6 +28,9 @@ void init(){
 	kbd_init();
 	enable_interrupts();
 	
+	writeToScreen = 0;
+	charGet = 0;
+
 	//TODO
 	uint8_t up, down;
 	

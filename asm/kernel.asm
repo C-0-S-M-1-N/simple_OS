@@ -1,10 +1,9 @@
-section .text
 	[bits 32]
 	[extern start]
 	[extern handle_keyboard_int]
-	
 	call start
 	
+		
 	jmp $
 
 global load_idt
@@ -41,6 +40,4 @@ enable_interrupts:
 	ret
 
 
-
-	jmp $
 

@@ -1,23 +1,19 @@
 #include "kbd.cpp"
 #include "include/init.cpp"
-#include "include/stdio.cpp"
+#include "stdio.hpp"
 #include "include/file.cpp"
 #include "console.cpp"
+#include "include/cppStuff.cpp"
 
 extern unsigned char *BASE;
-
 bool writeToScreen = 0;
-
-
+char charGet;
 //z+5
 extern "C" void start(){
-
 	init();
 	writeToScreen = 1;
+	printf("sdasd\n");
 	
-	//for(size_t i = 0; i<hs_s; i++) printf("%x %d, ", (int64_t)hs[i].ptr, hs[i].size);
-
-	return;
 }
 
 extern "C" void handle_keyboard_int(){
@@ -27,9 +23,10 @@ extern "C" void handle_keyboard_int(){
 		keyPress = 1;
 		uint8_t keycode = ioport_in(KEYBOARD_DATA_PORT);
 		unsigned char pr = getChar(keycode);
-
-		if((keycode & 128) != 128 && writeToScreen && pr)
-		printf("%c", (char)pr);
+		if((keycode & 128) != 128 && writeToScreen && pr){
+			printf("%c", (char)pr);
+			charGet = pr;
+		}
 		//printf(pr); 
 		//if((keycode & 128) == 128) printf("Released\n");
 		//else printf("Pressed\n"); 	

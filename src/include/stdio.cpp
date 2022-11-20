@@ -1,6 +1,8 @@
 #ifndef _STDIO_H_
 #define _STDIO_H_
 
+#include "../stdio.hpp"
+
 typedef long unsigned int size_t;
 typedef unsigned char uint8_t;
 typedef unsigned long long uint64_t;
@@ -9,8 +11,6 @@ typedef long long int64_t;
 typedef __builtin_va_list __gnuc_va_list;
 typedef __builtin_va_list va_list;
 
-#define va_start(v,l)	__builtin_va_start(v,l)
-#define va_arg(v,l)		__builtin_va_arg(v,l)
 
 
 unsigned char *BASE = 0;
@@ -46,7 +46,7 @@ void* memmove(void* src, void* dest, size_t s){
 	return dest;
 }
 
-int __msb__(size_t n, bool pos = 0){
+int __msb__(size_t n, bool pos){
 	n |= (n >> 1);
 	n |= (n >> 2);
 	n |= (n >> 4);
@@ -164,7 +164,7 @@ void printfNum__(int x, int color = 0x0f){
 	}
 
 }
-void printf(const char *str, ...){	
+extern "C" void printf(const char *str, ...){	
 		
 	BASE[_Y_*80*2+_X_] = 0;
 	BASE[_Y_*80*2+_X_+1] = 0x00;
@@ -329,6 +329,47 @@ bool strcmp(const char *s1, const char *s2){
 		if((s1 && !s2) || (!s1 && s2)) return false;
 	}
 	return true;
+}
+
+void strcpy(char *to, const char *from){
+	while(*from){
+		*to++ = *from++;
+	}
+	*to = 0;
+	return;
+}
+//123
+int stoi(char* s){
+	int ret = 0;
+	while(*s){
+		ret = ret*10 + (*s - '0');
+		s++;
+	}
+	return ret;
+}
+extern char charGet;
+extern bool writeToScreen;
+char gets(){
+	char c = charGet;
+	writeToScreen = 1;
+	while(c != charGet);
+	writeToScreen = 0;
+	return charGet;
+}
+
+void scanf(const char* c, ...){
+	char *str = (char*)malloc(250);
+	size_t i = 0;
+	char gc = gets();
+	va_list l;
+	__builtin_va_start(l, c);
+	while(gc != '\n'){
+		str[i++] = gc;	
+		gc = gets();
+	}
+	str[i] = 0;
+	printf("%s", str);
+	return;
 }
 
 void* operator new(size_t bytes){
