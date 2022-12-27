@@ -1,7 +1,9 @@
-#ifndef _STDIO_H_
-#define _STDIO_H_
-
+#ifndef _ST__D
+#define _ST__D
 #include "../stdio.hpp"
+#include "string.cpp"
+
+
 
 typedef long unsigned int size_t;
 typedef unsigned char uint8_t;
@@ -11,14 +13,24 @@ typedef long long int64_t;
 typedef __builtin_va_list __gnuc_va_list;
 typedef __builtin_va_list va_list;
 
-
-
-unsigned char *BASE = 0;
+extern "C" void halt();
+unsigned char *BASE = nullptr;
+bool BASE_mutex = 0;
+extern char* stdin;
+size_t stdinElement = 0;
 
 template <class T>void swap(T &a, T &b){
 	T aux = a;
 	a = b;
 	b = aux;
+}
+//TODO: make a priority queue
+__attribute__((optimize("O0")))void sleep(size_t time_ms){
+	unsigned long long t = time_ms*5'000'000, i = 0;
+	while(i < time_ms){
+		asm("pause");
+		i++;
+	}
 }
 
 template <class T>void qsort(T *a, size_t r, size_t l, bool (*cmp)(T, T)){
@@ -63,13 +75,11 @@ int __msb__(size_t n, bool pos){
 float __10__logs[] = {0, 0, 0.301, 0.477, 0.602, 0.698, 0.778, 0.845, 0.903, 0.954, 1};
 
 float log10(float x){
-	if(x == 10) return 1;
-	if(x == 1 || !x) return 0;
 	if(x > 10){
-		return log10((float)(x/10) + 1);
+		return log10((float)(x/10)) + 1;
 	}else{
-		float l = __10__logs[(int)x], l1 = __10__logs[(int)x+1];
-		return (l1-l)*(x-(int)x)+l;
+		float l = __10__logs[(int)x];
+		return l;
 	}
 }
 
@@ -82,9 +92,12 @@ float log2(float x){
 	}
 }
 
-int _X_ = 0, _Y_ = 0;
+int _X_ = 2, _Y_ = 0;
+int xS, yS;
 
 void memoryWrite__(unsigned char s, int color = 0x0f){
+	while(BASE_mutex);
+	BASE_mutex = 1;
 	switch(s){
 		case '\n':
 			BASE[_Y_*80*2+_X_++] = 10;
@@ -93,6 +106,8 @@ void memoryWrite__(unsigned char s, int color = 0x0f){
 			_Y_++;
 			break;
 		case '\t':
+			BASE[_Y_*80*2+_X_++] = '\t';
+			BASE[_Y_*80*2+_X_++] = 0;
 			_X_ += 4;
 			break;
 		case '\b':
@@ -120,7 +135,8 @@ void memoryWrite__(unsigned char s, int color = 0x0f){
 			}
 		}
 		for(int i = 0; i<80*2; i++) BASE[24*80*2 + i] = 0;
-	}	
+	}
+	BASE_mutex = 0;
 }
 
 const char* itoa(int x){
@@ -251,11 +267,11 @@ extern "C" void printf(const char *str, ...){
 //	allocate hs.last()+size
 //
 //}
-
 struct mem_hld{
-	void* ptr;
+	void *ptr;
 	size_t size{0};
-} *hs = (mem_hld*)0x90001;
+};
+mem_hld *hs = (mem_hld*)0x90001;
 
 size_t hs_s = 0;
 
@@ -322,22 +338,7 @@ void* realloc(void* ptr, size_t rsize){
 	return buff;
 }
 
-bool strcmp(const char *s1, const char *s2){
-	while(*s1 && *s2){
-		if(*s1 != *s2) return false;
-		s1++, s2++;
-		if((s1 && !s2) || (!s1 && s2)) return false;
-	}
-	return true;
-}
 
-void strcpy(char *to, const char *from){
-	while(*from){
-		*to++ = *from++;
-	}
-	*to = 0;
-	return;
-}
 //123
 int stoi(char* s){
 	int ret = 0;
@@ -347,29 +348,30 @@ int stoi(char* s){
 	}
 	return ret;
 }
-extern char charGet;
-extern bool writeToScreen;
-char gets(){
-	char c = charGet;
-	writeToScreen = 1;
-	while(c != charGet);
-	writeToScreen = 0;
-	return charGet;
+
+void flush_stdin(){
+	stdinElement = 0;
 }
 
-void scanf(const char* c, ...){
-	char *str = (char*)malloc(250);
-	size_t i = 0;
-	char gc = gets();
-	va_list l;
-	__builtin_va_start(l, c);
-	while(gc != '\n'){
-		str[i++] = gc;	
-		gc = gets();
+void __scanf_str(char* str){
+	flush_stdin();
+	while(stdin[stdinElement-1] != '\n'){
+		__asm__("hlt");
 	}
-	str[i] = 0;
-	printf("%s", str);
-	return;
+	stdin[stdinElement] = 0;
+	strcpy(str, stdin);
+	flush_stdin();
+}
+
+void scanf(const char* str, ...){
+	char* buff = (char*)malloc(8000000);
+	__scanf_str(buff);
+	va_list l;
+	__builtin_va_start(l, str);
+	
+	char* token;
+
+
 }
 
 void* operator new(size_t bytes){
@@ -386,4 +388,6 @@ void operator delete[](void* ptr){
 	free(ptr);
 }
 
+
+//files:
 #endif

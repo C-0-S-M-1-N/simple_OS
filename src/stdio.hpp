@@ -1,5 +1,6 @@
 #ifndef __STDIO_H
 #define __STDIO_H
+
 typedef long unsigned int size_t;
 typedef unsigned char uint8_t;
 typedef unsigned long long uint64_t;
@@ -17,6 +18,7 @@ float log10(float);
 float log2(float);
 const char* itoa(int);
 extern "C" void printf(const char*, ...);
+//__attribute__((optimize("O0")))void sleep(size_t);
 
 void* malloc(size_t);
 void free(void*);

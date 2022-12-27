@@ -39,5 +39,8 @@ enable_interrupts:
 	sti
 	ret
 
-
+global halt
+halt:
+	hlt
+	ret
 

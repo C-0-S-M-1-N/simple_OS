@@ -1,6 +1,6 @@
 #ifndef _FILESYSTEM__
 #define _FILESYSTEM__
-#include "../stdio.hpp"
+#include "stdio.cpp"
 
 struct file{
 	int c, h, s;

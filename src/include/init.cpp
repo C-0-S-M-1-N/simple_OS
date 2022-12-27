@@ -1,7 +1,7 @@
 #ifndef _KBD_H_
 #define _KBD_H_
 #include "../kbd.cpp"
-#include "../stdio.hpp"
+#include "stdio.cpp"
 extern unsigned char* BASE;
 #define CURSOR '\n'
 
@@ -13,9 +13,9 @@ typedef unsigned short uint16_t;
 
 
 extern bool writeToScreen;
+char* stdin;
 uint32_t RAM_SIZE = 0;
 
-extern char charGet;
 
 void init(){
 	hs[hs_s].ptr = (void*)0x91000;
@@ -29,7 +29,6 @@ void init(){
 	enable_interrupts();
 	
 	writeToScreen = 0;
-	charGet = 0;
 
 	//TODO
 	uint8_t up, down;
@@ -42,5 +41,8 @@ void init(){
 	
 
 	RAM_SIZE = down | up << 8;
+
+	stdin = (char*)malloc(8000000*sizeof(char));
+
 }
 #endif

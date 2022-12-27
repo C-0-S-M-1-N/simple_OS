@@ -1,6 +1,6 @@
 #ifndef _KEY_MAP_
 #define _KEY_MAP_
-#include "include/stdio.cpp"
+#include "stdio.hpp"
 
 char _codeToASCII[] = {
 0, //NULL BIT
