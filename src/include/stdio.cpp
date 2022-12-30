@@ -10,10 +10,24 @@ typedef unsigned char uint8_t;
 typedef unsigned long long uint64_t;
 typedef long long int64_t;
 
-typedef __builtin_va_list __gnuc_va_list;
 typedef __builtin_va_list va_list;
+#define va_start(v, l)		__builtin_va_start(v, l);
+#define va_arg(v, l)		__builtin_va_arg(v, l);
 
-extern "C" void halt();
+static inline void ioport_outw(unsigned int port, unsigned short data){
+	__asm__ volatile("outw %w0, %w1" : : "a" (data), "Nd" (port));	
+}
+
+static inline unsigned short ioport_inw(unsigned int port){
+    unsigned short data;
+    __asm__ volatile("inw %w1, %w0" : "=a" (data) : "Nd" (port));
+    return data;
+}
+
+static inline void halt(){
+	__asm__ volatile ("hlt");
+}
+
 unsigned char *BASE = nullptr;
 bool BASE_mutex = 0;
 extern char* stdin;
@@ -92,7 +106,7 @@ float log2(float x){
 	}
 }
 
-int _X_ = 2, _Y_ = 0;
+int _X_ = 0, _Y_ = 0;
 int xS, yS;
 
 void memoryWrite__(unsigned char s, int color = 0x0f){
@@ -125,7 +139,7 @@ void memoryWrite__(unsigned char s, int color = 0x0f){
 			break;
 	
 	}
-	if(_X_ > 80*2) _X_ = 0, _Y_++;
+	if(_X_ > 79*2) _X_ = 0, _Y_++;
 	if(_Y_ > 24){ //scroll
 		_Y_ = 24;	
 		for(int i = 0; i<24; i++){
@@ -173,7 +187,7 @@ void printfNum__(int x, int color = 0x0f){
 		buff[p2++] = str[p--];
 	}
 	buff[p2] = 0;
-	p2 = 0;
+	p2 = 0;;
 	if(neg) memoryWrite__('-', color);
 	while(buff[p2]){
 		memoryWrite__(buff[p2++], color);
@@ -273,24 +287,37 @@ struct mem_hld{
 };
 mem_hld *hs = (mem_hld*)0x90001;
 
+
 size_t hs_s = 0;
 
 
 //start: 0x91000
+//
+//
+//HOW TF IT WORKS??
+//
+//hs is a vector that has 0x91000 - 0x90001 elements
+//
+//eatch time malloc is called, we scan the whole free memory until we find space for our malloc, witch is damn fast, like we can have enough space inbetween the 3rd and 4th block, and we insetr it there;
+//
 void* malloc(size_t bytes){
 	void* ret = nullptr;
 //sort
 //TODO: review
+
+
+	
+
 	for(size_t i = 0; i<hs_s - 1; i++){
 		
 		if((uint8_t*)hs[i+1].ptr - ((uint8_t*)hs[i].ptr+hs[i].size) >= bytes){
 			ret = (uint8_t*)hs[i].ptr+hs[i].size;
 			
-			//inster at i+1
+			//insert at i+1
 
-			for(int j = hs_s-1; j>i; j--){
-				hs[j+1] = hs[j];
-			}
+			
+			memmove(hs+i+1, hs+i+2, hs_s-i);
+			
 			hs[i+1].ptr = ret;
 			hs[i+1].size = bytes;
 			hs_s++;
@@ -305,7 +332,6 @@ void* malloc(size_t bytes){
 	hs[hs_s++].size = bytes;	
 	return ret;
 }
-
 
 void free(void* ptr){
 	int i = 0, j = hs_s-1, m;
@@ -358,21 +384,56 @@ void __scanf_str(char* str){
 	while(stdin[stdinElement-1] != '\n'){
 		__asm__("hlt");
 	}
-	stdin[stdinElement] = 0;
+	stdin[stdinElement-1] = 0;
 	strcpy(str, stdin);
 	flush_stdin();
 }
-
+#define SPCHR 1
 void scanf(const char* str, ...){
-	char* buff = (char*)malloc(8000000);
+	char* buff = (char*)malloc(8000000), *bcp;
+	bcp = buff;
 	__scanf_str(buff);
 	va_list l;
-	__builtin_va_start(l, str);
+	va_start(l, str);
 	
-	char* token;
+	
+	for(int i = 0; str[i]; i++){
+		if(str[i] != '%') continue;
+		i++;
+		
+		switch(str[i]){
+		case 'd':{
+			int* ret = va_arg(l, int*);
+			char* tmp = (char*)malloc(21);
+			int i; for(i = 0; buff[i] != ' ' && buff[i]; i++){
+				tmp[i] = buff[i];
+			}
+			buff += i+1;
+			tmp[i] = 0;
+			*ret = stoi(tmp);
+			free(tmp);
+		} break;
+		case 's':{
+			char* s = va_arg(l, char*);
+			int i; for(i = 0; buff[i] != ' ' && buff[i]; i++){
+				s[i] = buff[i];
+			}
+			buff += i + 1;
+				 
+		} break;
+		case 'c':{
+			char* c = va_arg(l, char*);
+			*c = *(buff++);
 
+		} break;
+		}
 
+	}
+
+	free(bcp);
 }
+#undef SPCHR
+
 
 void* operator new(size_t bytes){
 	return malloc(bytes);

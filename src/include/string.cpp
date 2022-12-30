@@ -1,6 +1,7 @@
 #ifndef __STRING_H
 #define __STRING_H
-
+//#include "../stdio.hpp"
+#define NULL 0
 
 
 bool strcmp(const char *s1, const char *s2){
@@ -9,6 +10,7 @@ bool strcmp(const char *s1, const char *s2){
 		s1++, s2++;
 		if((*s1 && !*s2) || (!*s1 && *s2)) return false;
 	}
+	if((*s1 && !*s2) || (!*s1 && *s2)) return false;
 	return true;
 }
 
@@ -32,14 +34,13 @@ void strcpy(char *to, const char *from){
 }
 
 bool strchr(const char* str, const char chr){
-	while(*str++){
-		if(*str == chr) return 1;
+	int i = 0;
+	while(str[i]){
+		if(str[i] == chr) return 1;
+		i++;
 	}
 	return 0;
 }
 
-void strtok(char* str, const char* restrict){
-	static char* inp;
-}
 
 #endif

@@ -1,10 +1,9 @@
 	[bits 32]
 	[extern start]
 	[extern handle_keyboard_int]
+	[extern div0Exception]
 	call start
-	
-		
-	jmp $
+	jmp _exit__
 
 global load_idt
 load_idt:
@@ -39,8 +38,13 @@ enable_interrupts:
 	sti
 	ret
 
-global halt
-halt:
-	hlt
-	ret
+global div0
+div0:
+	pushad
+	cld
+	call div0Exception
+	popad
+	iretd
 
+_exit__:
+	jmp $

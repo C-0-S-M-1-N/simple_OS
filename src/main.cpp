@@ -1,31 +1,42 @@
 #include "kbd.cpp"
 #include "include/init.cpp"
-//#include "include/stdio.cpp"
 #include "include/stdio.cpp"
-#include "include/file.cpp"
-#include "console.cpp"
 #include "include/cppStuff.cpp"
-#include "apic.cpp"
+#include "include/string.cpp"
+#include "powerm.cpp"
+#include "include/micell.cpp"
 
-extern "C" void halt();
 bool writeToScreen = 0, getkey = 0;
 extern char* stdin;
 extern size_t stdinElement;
 //z+5
 extern "C" void start(){
 	init();
-
 	writeToScreen = 1;
+	char* commandInput = (char*)malloc(1000*sizeof(char));
+	int a, b;
 	
-	char *s = (char*)malloc(100*sizeof(char));
+	scanf("%d %d", &a, &b);
+	printf("%d", a/b);
 
-	printf("%s\n", s);
+	return;
+	//printf("%p", malloc);
+	while("false"){
+		printf(">");
+		scanf("%s", commandInput);
 
-	//for(int i = 0; i<16; i++){
-	//	printf("%c %d\n", s[i], s[i]);
-	//}
+		if(strcmp(commandInput, "exit")) break;
+		else if(strcmp(commandInput, "reboot")) reboot();
+		else if(strcmp(commandInput, "memmap")) memoryMap();
+		else printf("Unknown command, use help for commands");
 
-	//for(int i = 0; i<100-1; i++) printf("%c", s[i]);
+		printf("\n");
+	}
+	printf("exiting...");
+	//free(commandInput);
+	ioport_outw(0x604, 0x2000);
+
+
 }
 extern "C" void handle_keyboard_int(){
 	ioport_out(PIC1_COMMAND_PORT, 0x20);
@@ -37,8 +48,13 @@ extern "C" void handle_keyboard_int(){
 
 		if((keycode & 128) != 128 && pr){
 			if(writeToScreen) printf("%c", (char)pr);
-			stdin[stdinElement++] = pr;
+			if(pr == '\b'){
+				stdinElement--;
+			}
+			else stdin[stdinElement++] = pr;
 			if(stdinElement >= 8000000) stdinElement = 0;
+			BASE[78*2] = pr;
+			BASE[78*2+1] = 0xf0;
 		
 		}
 

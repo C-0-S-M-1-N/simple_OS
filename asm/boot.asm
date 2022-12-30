@@ -11,7 +11,7 @@ mov bp, 0x8000
 mov sp, bp
 
 mov bx, KERNEL_LOCATION
-mov dh, 20
+mov dh, 100
 
 mov ah, 0x02
 mov al, dh
@@ -36,7 +36,6 @@ or eax, 1
 mov cr0, eax
 jmp CODE_SEG:start_protected_mode
 
-jmp $
 
 BOOT_DISK: db 0
 
@@ -76,9 +75,6 @@ start_protected_mode:
 	mov ebp, 0x90000
 	mov esp, ebp
 	jmp KERNEL_LOCATION
-
-
-jmp $
 
 
 times 510-($-$$) db 0
