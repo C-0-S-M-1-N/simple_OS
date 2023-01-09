@@ -129,13 +129,22 @@ unsigned char getChar(unsigned int keycode){
 		default:{
 			if(keycode > 128){
 				char c = _codeToASCII[keycode-0x80];
-				if(L_SHIFT || R_SHIFT) c = toUpper(c);
+				if(L_SHIFT || R_SHIFT) c = toUpper(c);	
+				if(capsLock){
+					if(c >= 'a' && c <= 'z') c -= 32;
+					else if(c >= 'A' && c <= 'Z') c += 32;
+				}
 				kbd_keys[c] = 0;
 				//printf((unsigned char)c);
 				//printf(" was released \0");
 			}
 			char c = _codeToASCII[keycode];
 			if(L_SHIFT || R_SHIFT) c = toUpper(c);
+			if(capsLock){
+				if(c >= 'a' && c <= 'z') c -= 32;
+				else if(c >= 'A' && c <= 'Z') c += 32;
+			}
+	
 			kbd_keys[c] = 1;
 			return c;
 			break;	

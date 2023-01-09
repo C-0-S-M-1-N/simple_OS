@@ -19,6 +19,7 @@ uint32_t RAM_SIZE = 0;
 
 void init(){
 	hs[hs_s].ptr = (void*)0x91000;
+	strcpy(hs[hs_s].deb_name, "SYS_RES");
 	hs[hs_s++].size = 1;
 
 
@@ -45,9 +46,9 @@ void init(){
 	up = inb(0x71);
 	
 
-	RAM_SIZE = down | up << 8;
+	RAM_SIZE = down | (up << 8);
 
-	stdin = (char*)malloc(8'000'000*sizeof(char));
+	stdin = (char*)malloc(8'000'000*sizeof(char), "STDIN");
 
 }
 #endif

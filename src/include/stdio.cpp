@@ -109,7 +109,14 @@ float log2(float x){
 int _X_ = 0, _Y_ = 0;
 int xS, yS;
 
+short memoryBuffer[100000];
+int memoryBufferInt = 0;
+
 void memoryWrite__(unsigned char s, int color = 0x0f){
+	
+	memoryBuffer[memoryBufferInt] = s;
+	memoryBuffer[memoryBufferInt++] = color;
+
 	while(BASE_mutex);
 	BASE_mutex = 1;
 	switch(s){
@@ -284,6 +291,7 @@ extern "C" void printf(const char *str, ...){
 struct mem_hld{
 	void *ptr;
 	size_t size{0};
+	char deb_name[100];
 };
 mem_hld *hs = (mem_hld*)0x90001;
 
@@ -300,7 +308,7 @@ size_t hs_s = 0;
 //
 //eatch time malloc is called, we scan the whole free memory until we find space for our malloc, witch is damn fast, like we can have enough space inbetween the 3rd and 4th block, and we insetr it there;
 //
-void* malloc(size_t bytes){
+void* malloc(size_t bytes, const char* n){
 	void* ret = nullptr;
 //sort
 //TODO: review
@@ -320,6 +328,7 @@ void* malloc(size_t bytes){
 			
 			hs[i+1].ptr = ret;
 			hs[i+1].size = bytes;
+			strcpy(hs[i+1].deb_name, n);
 			hs_s++;
 
 			return ret;
@@ -329,7 +338,8 @@ void* malloc(size_t bytes){
 
 	ret = (uint8_t*)hs[hs_s-1].ptr+hs[hs_s-1].size;
 	hs[hs_s].ptr = ret;
-	hs[hs_s++].size = bytes;	
+	hs[hs_s].size = bytes;
+	strcpy(hs[hs_s++].deb_name, n);
 	return ret;
 }
 
@@ -358,7 +368,7 @@ void* realloc(void* ptr, size_t rsize){
 		return ptr;
 	}
 	
-	void *buff = malloc(rsize);
+	void *buff = malloc(rsize, hs[m].deb_name);
 	memmove(ptr, buff, hs[m].size);
 	free(ptr);
 	return buff;
@@ -390,9 +400,13 @@ void __scanf_str(char* str){
 }
 #define SPCHR 1
 void scanf(const char* str, ...){
-	char* buff = (char*)malloc(8000000), *bcp;
-	bcp = buff;
-	__scanf_str(buff);
+	flush_stdin();
+	while(stdin[stdinElement-1] != '\n'){
+		__asm__("hlt");
+	}
+	stdin[stdinElement-1] = 0;
+	char* buff = stdin;
+	
 	va_list l;
 	va_start(l, str);
 	
@@ -404,7 +418,7 @@ void scanf(const char* str, ...){
 		switch(str[i]){
 		case 'd':{
 			int* ret = va_arg(l, int*);
-			char* tmp = (char*)malloc(21);
+			char* tmp = (char*)malloc(21, "tmp");
 			int i; for(i = 0; buff[i] != ' ' && buff[i]; i++){
 				tmp[i] = buff[i];
 			}
@@ -418,6 +432,7 @@ void scanf(const char* str, ...){
 			int i; for(i = 0; buff[i] != ' ' && buff[i]; i++){
 				s[i] = buff[i];
 			}
+			s[i] = 0;
 			buff += i + 1;
 				 
 		} break;
@@ -429,17 +444,16 @@ void scanf(const char* str, ...){
 		}
 
 	}
-
-	free(bcp);
+	flush_stdin();
 }
 #undef SPCHR
 
 
 void* operator new(size_t bytes){
-	return malloc(bytes);
+	return malloc(bytes, "NULL");
 }
 void* operator new[](size_t bytes){
-	return malloc(bytes);
+	return malloc(bytes, "NULL");
 }
 
 void operator delete(void *ptr){
