@@ -399,7 +399,7 @@ void __scanf_str(char* str){
 	flush_stdin();
 }
 #define SPCHR 1
-void scanf(const char* str, ...){
+extern "C" void scanf(const char* str, ...){
 	flush_stdin();
 	while(stdin[stdinElement-1] != '\n'){
 		__asm__("hlt");

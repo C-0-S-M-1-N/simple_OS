@@ -1,8 +1,4 @@
-#ifndef __STRING_H
-#define __STRING_H
-//#include "../stdio.hpp"
 #define NULL 0
-
 
 bool strcmp(const char *s1, const char *s2){
 	while(*s1 && *s2){
@@ -43,4 +39,3 @@ bool strchr(const char* str, const char chr){
 }
 
 
-#endif

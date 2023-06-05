@@ -2,7 +2,7 @@
 #include "include/init.cpp"
 #include "include/stdio.cpp"
 #include "include/cppStuff.cpp"
-#include "include/string.cpp"
+#include "incl/string.hpp"
 #include "powerm.cpp"
 #include "include/micell.cpp"
 #include "drivers/IDE.cpp"
@@ -73,7 +73,7 @@ extern "C" void handle_keyboard_int(){
 				BASE[78*2+1] = 0xf0;
 			}
 		}
-		//else {
+			//else {
 		//	if(pr == '8') printf("up");
 		//	else if(pr == '2') printf("down");
 		//	else if(pr == '4') printf("left");
