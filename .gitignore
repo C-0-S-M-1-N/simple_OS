@@ -1,3 +1,6 @@
 *.img
 *.pdf
 make.sh
+*.swp
+./*.swp
+./*/*.swp
