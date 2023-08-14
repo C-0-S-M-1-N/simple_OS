@@ -1,22 +1,23 @@
-#ifndef _STDIO_HPP_
-#define _STDIO_HPP_
+#ifndef __STDIO_H
+#define __STDIO_H
+#include <types.hpp>
+#include <init.hpp>
 
-extern char* stdin;
-extern unsigned char* BASE;
-extern bool BASE_mutex;
-extern unsigned int stdinElement;
-
-static inline void ioport_outw(unsigned int port, unsigned int data);
-static inline unsigned short ioport_inw(unsigned int port);
-
-void memoryWrite__(unsigned, int = 0x0f);
-void printfNum__(int, int = 0x0f);
+extern int8_t* stdin;
+extern uint8_t* BASE;
+extern size_t stdinElement;
+extern int16_t memoryBuffer[];
+extern int32_t memoryBufferInt;
 
 extern "C" void printf(const char*, ...);
+//__attribute__((optimize("O0")))void sleep(size_t);
 
 extern "C" void scanf(const char*, ...);
 
-void flush_stdin();
-void __scanf_str(char*);
+extern int stoi(char *s);
+
+extern void ioport_outw(uint32_t port, uint16_t data);
+
+extern uint32_t ioport_inw(uint32_t port);
 
 #endif

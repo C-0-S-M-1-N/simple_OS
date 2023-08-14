@@ -1,4 +1,4 @@
-#define NULL 0
+#include <string.hpp>
 
 bool strcmp(const char *s1, const char *s2){
 	while(*s1 && *s2){
@@ -27,6 +27,13 @@ void strcpy(char *to, const char *from){
 	}
 	*to = 0;
 	return;
+}
+
+void strcpy(char *to, char* from){
+	strcpy(to, from);
+}
+void strcpy(const char* to, const char* from){
+	strcpy((char*)to, from);
 }
 
 bool strchr(const char* str, const char chr){

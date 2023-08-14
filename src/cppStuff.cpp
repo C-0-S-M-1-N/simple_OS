@@ -1,7 +1,7 @@
 #ifndef _ICXXABI_H
 #define _ICXXABI_H
 
-#include "stdio.cpp"
+#include <stdio.hpp>
 #ifdef __cplusplus
 extern "C"{
 #endif

@@ -1,15 +1,12 @@
-#ifndef __POWH__
-#define __POWH__
-#include "include/stdio.cpp"
-#include "kbd.cpp"
-#include "kbd_map.h"
+#include <powerm.hpp>
+#include <stdio.hpp>
+#include <stdmem.hpp>
+#include <kbd.hpp>
+#include <kbd_map.hpp>
 
 
-void reboot()
-{
+void reboot(void){
 	stdinElement = 0;
-	_Y_ = 0;
-	_X_ = 0;
 	while(hs_s){
 		free(hs[0].ptr);
 	}
@@ -23,11 +20,10 @@ void reboot()
     halt();
 }
 
-void keyDebug(){
+void keyDebug(void){
 	for(int i = 1; i <= 12; i++){
 		printf("F%d : %d\n", i, Fs[i]);
 	}
 	printf("capsLock : %d", capsLock);
 }
 
-#endif

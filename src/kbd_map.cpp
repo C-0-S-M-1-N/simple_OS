@@ -1,8 +1,8 @@
-#ifndef _KEY_MAP_
-#define _KEY_MAP_
-#include "stdio.hpp"
+#include <stdio.hpp>
+#include <kbd_map.hpp>
+#include <types.hpp>
 
-char _codeToASCII[] = {
+int8_t _codeToASCII[] = {
 0, //NULL BIT
 0, //esc
 '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b', //backspace
@@ -39,7 +39,7 @@ char _codeToASCII[] = {
 0, //F12
 };
 
-unsigned char extraNUM[] = ")!@#$%^&*(";
+uint8_t extraNUM[] = ")!@#$%^&*(";
 
 //RIGHT
 bool R_SHIFT = 0, R_CTRL = 0, R_ALT = 0;
@@ -72,19 +72,23 @@ char toUpper(char x){
 	return x;	
 }
 
-unsigned char getChar(unsigned int keycode){
+uint8_t getChar(uint32_t keycode){
 	//Fs handle
 	if(keycode <= 0x44 && keycode >= 0x3B){
 		int Fnum = keycode - 0x3B + 1;
 		Fs[Fnum] = 1;
-	}else if(keycode == 0x57) Fs[11] = 1;
+	}
+	else if(keycode == 0x57) Fs[11] = 1;
 	else if(keycode == 0x58) Fs[12] = 1;
-	else if(keycode <= 0xC4 && keycode >= 0xBB){
+	else 
+		if(keycode <= 0xC4 && keycode >= 0xBB){
 		int Fnum = keycode - 0xBB + 1;
 		Fs[Fnum] = 0;
-	}else if(keycode == 0xD7) Fs[11] = 0;
+	} 
+	else if(keycode == 0xD7) Fs[11] = 0;
 	else if(keycode == 0xD8) Fs[12] = 0;
-	else{
+	else 
+	{
 	
 	switch(keycode){
 		case 0x1D:
@@ -158,4 +162,3 @@ unsigned char getChar(unsigned int keycode){
 	return 0;
 }
 
-#endif

@@ -1,16 +1,17 @@
-#include "kbd.cpp"
-#include "include/init.cpp"
-#include "include/stdio.cpp"
-#include "include/cppStuff.cpp"
-#include "incl/string.hpp"
-#include "powerm.cpp"
-#include "include/micell.cpp"
-#include "drivers/IDE.cpp"
+#include <stdlib.hpp>
+#include <powerm.hpp>
+#include <kbd.hpp>
+#include <types.hpp>
+#include <stdmem.hpp>
+#include <string.hpp>
+#include <micell.hpp>
+#include <init.hpp>
+#include <kbd_map.hpp>
+#include <stdio.hpp>
+
 
 bool writeToScreen = 0, getkey = 0;
-extern char* stdin;
 extern size_t stdinElement;
-extern uint32_t RAM_SIZE;
 bool charDeb = 0;
 //z+5
 extern "C" void start(){
@@ -33,15 +34,12 @@ extern "C" void start(){
 			BASE[78*2] = 0;
 			BASE[78*2+1] = 0x00;
 
-		}
-		else if(strcmp(commandInput, "clear")){
+		} else if(strcmp(commandInput, "clear")){
 			memoryBufferInt = 0;
-		}
-		else if(strcmp(commandInput, "keyDebug")){
+		} else if(strcmp(commandInput, "keyDebug")){
 			keyDebug();
 		}
 		else printf("Unknown command %s, use help for commands\n", commandInput);
-
 		//printf("\n");
 	}
 	printf("exiting...");

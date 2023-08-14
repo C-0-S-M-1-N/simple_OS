@@ -1,110 +1,28 @@
-#ifndef _ST__D
-#define _ST__D
-#include "../stdio.hpp"
-#include "string.cpp"
+#include <stdio.hpp>
+#include <string.hpp>
+#include <types.hpp>
+#include <stdmem.hpp>
+#include <micell.hpp>
 
 
-
-typedef long unsigned int size_t;
-typedef unsigned char uint8_t;
-typedef unsigned long long uint64_t;
-typedef long long int64_t;
-
-typedef __builtin_va_list va_list;
-#define va_start(v, l)		__builtin_va_start(v, l);
-#define va_arg(v, l)		__builtin_va_arg(v, l);
-
-static inline void ioport_outw(unsigned int port, unsigned short data){
+void ioport_outw(uint32_t port, uint16_t data){
 	__asm__ volatile("outw %w0, %w1" : : "a" (data), "Nd" (port));	
 }
 
-static inline unsigned short ioport_inw(unsigned int port){
+uint32_t ioport_inw(uint32_t port){
     unsigned short data;
     __asm__ volatile("inw %w1, %w0" : "=a" (data) : "Nd" (port));
     return data;
 }
 
-static inline void halt(){
-	__asm__ volatile ("hlt");
-}
 
-unsigned char *BASE = nullptr;
+
+
+uint8_t *BASE = nullptr;
 bool BASE_mutex = 0;
 extern char* stdin;
 size_t stdinElement = 0;
 
-template <class T>void swap(T &a, T &b){
-	T aux = a;
-	a = b;
-	b = aux;
-}
-//TODO: make a priority queue
-__attribute__((optimize("O0")))void sleep(size_t time_ms){
-	unsigned long long t = time_ms*5'000'000, i = 0;
-	while(i < time_ms){
-		asm("pause");
-		i++;
-	}
-}
-
-template <class T>void qsort(T *a, size_t r, size_t l, bool (*cmp)(T, T)){
-	if(l < r){
-		size_t m = (r+l) / 2;
-		swap(a[l], a[m]);
-		int i = l, j = r, d = 0;
-		while(i < j){
-			if(cmp(a[i], a[j])){
-				swap(a[i], a[j]);
-				d = 1 - d;
-			}
-			i += d;
-			j -= 1 - d;
-		}	
-		qsort(a, r, i-1, cmp);
-		qsort(a, i+1, l, cmp);
-	}
-}
-
-void* memmove(void* src, void* dest, size_t s){
-	for(size_t i = 0; i<s; i++){
-	 	*((uint8_t*)dest+i) = *((uint8_t*)src+i);
-	}
-	return dest;
-}
-
-int __msb__(size_t n, bool pos){
-	n |= (n >> 1);
-	n |= (n >> 2);
-	n |= (n >> 4);
-	n |= (n >> 8);
-	n |= (n >> 16);
-	n ++;
-	n >>= 1;
-	if(pos == 0) return n;
-	int p = 0;
-	while(n > 0) p++, n = n >> 1;
-	return p;	
-}
-
-float __10__logs[] = {0, 0, 0.301, 0.477, 0.602, 0.698, 0.778, 0.845, 0.903, 0.954, 1};
-
-float log10(float x){
-	if(x > 10){
-		return log10((float)(x/10)) + 1;
-	}else{
-		float l = __10__logs[(int)x];
-		return l;
-	}
-}
-
-
-float log2(float x){
-	if(x > 2){
-		return log2((float)x/__msb__(x)) + __msb__(x, 1) - 1;
-	}else{
-		return float(x-1);
-	}
-}
 
 int _X_ = 0, _Y_ = 0;
 int xS, yS;
@@ -201,6 +119,7 @@ void printfNum__(int x, int color = 0x0f){
 	}
 
 }
+
 extern "C" void printf(const char *str, ...){	
 		
 	BASE[_Y_*80*2+_X_] = 0;
@@ -272,109 +191,6 @@ extern "C" void printf(const char *str, ...){
 
 }
 
-
-
-//holder struct:
-//	void* pointer to the block
-//	size_t size of the block
-//
-//hs* = 0x90001(holder)
-//
-//malloc(){
-//	sort(hs); //we can use bubble sort since it will only be one itteration
-//	for(i : sorts){
-//		if i+1.pointer - (i.pointer+i.size) >= size: allocate
-//	}
-//	allocate hs.last()+size
-//
-//}
-struct mem_hld{
-	void *ptr;
-	size_t size{0};
-	char deb_name[100];
-};
-mem_hld *hs = (mem_hld*)0x90001;
-
-
-size_t hs_s = 0;
-
-
-//start: 0x91000
-//
-//
-//HOW TF IT WORKS??
-//
-//hs is a vector that has 0x91000 - 0x90001 elements
-//
-//eatch time malloc is called, we scan the whole free memory until we find space for our malloc, witch is damn fast, like we can have enough space inbetween the 3rd and 4th block, and we insetr it there;
-//
-void* malloc(size_t bytes, const char* n){
-	void* ret = nullptr;
-//sort
-//TODO: review
-
-
-	
-
-	for(size_t i = 0; i<hs_s - 1; i++){
-		
-		if((uint8_t*)hs[i+1].ptr - ((uint8_t*)hs[i].ptr+hs[i].size) >= bytes){
-			ret = (uint8_t*)hs[i].ptr+hs[i].size;
-			
-			//insert at i+1
-
-			
-			memmove(hs+i+1, hs+i+2, hs_s-i);
-			
-			hs[i+1].ptr = ret;
-			hs[i+1].size = bytes;
-			strcpy(hs[i+1].deb_name, n);
-			hs_s++;
-
-			return ret;
-		}
-		
-	}
-
-	ret = (uint8_t*)hs[hs_s-1].ptr+hs[hs_s-1].size;
-	hs[hs_s].ptr = ret;
-	hs[hs_s].size = bytes;
-	strcpy(hs[hs_s++].deb_name, n);
-	return ret;
-}
-
-void free(void* ptr){
-	int i = 0, j = hs_s-1, m;
-	while(i<j){
-		m = (i+j)/2;
-		if(ptr < hs[m].ptr) j = m-1;
-		else if(ptr > hs[m].ptr) i = m+1;
-		else break; 
-	}
-	for(i = m; i<hs_s-1; i++) swap(hs[i], hs[i+1]);
-	hs_s--;
-}
-
-void* realloc(void* ptr, size_t rsize){
-	size_t rh = 0, lf = hs_s-1, m;
-	while(rh < lf){
-		m = (rh + lf) / 2;
-		if(ptr < hs[m].ptr) lf = m-1;
-		if(ptr > hs[m].ptr) rh = m+1;
-		else break;	
-	}
-	if((uint8_t*)hs[m+1].ptr - (uint8_t*)hs[m].ptr >= rsize){
-		hs[m].size = rsize;
-		return ptr;
-	}
-	
-	void *buff = malloc(rsize, hs[m].deb_name);
-	memmove(ptr, buff, hs[m].size);
-	free(ptr);
-	return buff;
-}
-
-
 //123
 int stoi(char* s){
 	int ret = 0;
@@ -398,6 +214,7 @@ void __scanf_str(char* str){
 	strcpy(str, stdin);
 	flush_stdin();
 }
+
 #define SPCHR 1
 extern "C" void scanf(const char* str, ...){
 	flush_stdin();
@@ -446,23 +263,9 @@ extern "C" void scanf(const char* str, ...){
 	}
 	flush_stdin();
 }
-#undef SPCHR
 
 
-void* operator new(size_t bytes){
-	return malloc(bytes, "NULL");
-}
-void* operator new[](size_t bytes){
-	return malloc(bytes, "NULL");
-}
 
-void operator delete(void *ptr){
-	free(ptr);
-}
-void operator delete[](void* ptr){
-	free(ptr);
-}
 
 
 //files:
-#endif

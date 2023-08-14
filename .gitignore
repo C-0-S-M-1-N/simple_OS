@@ -1,6 +1,11 @@
 *.img
 *.pdf
 make.sh
+./.cache
+./link
+./bin
+.bochsrc
+compile_commands.json
 *.swp
 ./*.swp
 ./*/*.swp

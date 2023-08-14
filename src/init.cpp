@@ -1,12 +1,12 @@
-#ifndef _KBD_H_
-#define _KBD_H_
-#include "../kbd.cpp"
-#include "stdio.cpp"
+#include <init.hpp>
+#include <stdmem.hpp>
+#include <types.hpp>
+#include <kbd.hpp>
+#include <string.hpp>
+#include <stdio.hpp>
+
 extern unsigned char* BASE;
 #define CURSOR '\n'
-
-typedef short int16_t;
-typedef unsigned short uint16_t;
 
 #define inb(p) ioport_in(p)
 #define outb(p, a) ioport_out(p, a)
@@ -51,4 +51,3 @@ void init(){
 	stdin = (char*)malloc(8'000'000*sizeof(char), "STDIN");
 
 }
-#endif

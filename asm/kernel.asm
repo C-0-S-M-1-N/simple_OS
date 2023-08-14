@@ -48,3 +48,5 @@ div0:
 
 _exit__:
 	jmp $
+
+; times $-$$ db 0

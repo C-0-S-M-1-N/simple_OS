@@ -1,5 +1,22 @@
-megs: 100
-display_library: sdl2
-floppya: 1_44='OS.bin', status=inserted
-boot: a
+config_interface: textconfig
 
+display_library: sdl2
+cpu: count=2, ips=10000000
+
+megs: 128
+
+romimage: file=bios/BIOS-bochs-latest, options=fastboot
+vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+
+vga: externsion=vbe
+
+keyboard: user_shortcut=ctrl-alt-del
+
+mouse: enabled=0
+
+auto-detect floppy media type:
+	floppya: image=OS.bin, status=inserted
+
+bood: floppy
+
+log: /dev/null

@@ -1,8 +1,5 @@
-#ifndef APIC_H_
-#define APIC_H_
-#include"include/stdio.cpp"
-#include"kbd.cpp"
-#include"include/cppStuff.cpp"
+#include <stdio.hpp>
+#include <kbd.hpp>
 
 #define INIT_CNT_REG_TIMER 0x380
 #define CURRENT_CNT_REG_TIMER 0x390
@@ -13,4 +10,3 @@
 
 
 
-#endif
