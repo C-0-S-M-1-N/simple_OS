@@ -15,6 +15,7 @@ extern size_t stdinElement;
 bool charDeb = 0;
 //z+5
 extern "C" void start(){
+	while(1);
 	init();
 	writeToScreen = 1;
 	char* commandInput = (char*)malloc(1000*sizeof(char), "cmmd inp");

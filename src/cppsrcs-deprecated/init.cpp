@@ -48,6 +48,6 @@ void init(){
 
 	RAM_SIZE = down | (up << 8);
 
-	stdin = (char*)malloc(8'000'000*sizeof(char), "STDIN");
+// 	stdin = (char*)malloc(8'000'000*sizeof(char), "STDIN");
 
 }
