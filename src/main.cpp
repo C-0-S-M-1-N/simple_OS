@@ -13,21 +13,21 @@
 bool writeToScreen = 0, getkey = 0;
 extern size_t stdinElement;
 bool charDeb = 0;
-//z+5
+
 extern "C" void start(){
-	while(1);
 	init();
 	writeToScreen = 1;
 	char* commandInput = (char*)malloc(1000*sizeof(char), "cmmd inp");
 	//free(stdin);
 	int a, b;
+	bool keep_on = 1;
 	
 	//printf("%p", malloc);
-	while("false"){
+	while(keep_on){
 		printf(">");
 		scanf("%s", commandInput);
 
-		if(strcmp(commandInput, "exit")) break;
+		if(strcmp(commandInput, "exit")) keep_on = 0;
 		else if(strcmp(commandInput, "reboot")) reboot();
 		else if(strcmp(commandInput, "memmap")) memoryMap();
 		else if(strcmp(commandInput, "toggleDebug")){

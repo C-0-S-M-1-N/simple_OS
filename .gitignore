@@ -1,6 +1,4 @@
-*.img
-*.pdf
-.cache
 link
 bin
+.cache
 compile_commands.json

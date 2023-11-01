@@ -1,11 +1,14 @@
-[org 0x7c00]
 [bits 16]
+[org 0x7c00]
 KERNEL_LOCATION equ 0x1000
 
 mov [BOOT_DISK], dl
 
 xor ax, ax
+mov al, 0x3
+int 0x10
 
+xor ax, ax
 
 mov es, ax
 mov ds, ax
@@ -15,7 +18,7 @@ mov sp, bp
 mov bx, KERNEL_LOCATION 
 
 mov ah, 0x02
-mov al, 30
+mov al, 40
 mov ch, 0x00
 mov dh, 0x00
 mov cl, 0x01
@@ -43,9 +46,24 @@ DATA_SEG equ GDT_data - GDT_start
 cli
 lgdt [GDT_descriptor]
 mov eax, cr0
-or eax, 1
+or al, 1
 mov cr0, eax
+
 jmp CODE_SEG:start_protected_mode
+
+[bits 32]
+start_protected_mode:
+	mov ax, DATA_SEG
+	mov ds, ax
+	mov ss, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+	mov ebp, 0x90000
+	mov esp, ebp
+	mov word [0xb8000], 0x0f30
+	jmp $
+	jmp KERNEL_LOCATION
 
 BOOT_DISK: db 0
 
@@ -73,18 +91,6 @@ GDT_end:
 GDT_descriptor:
 	dw GDT_end - GDT_start - 1
 	dd GDT_start
-
-[bits 32]
-start_protected_mode:
-	mov ax, DATA_SEG
-	mov ds, ax
-	mov ss, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
-	mov ebp, 0x90000
-	mov esp, ebp
-	jmp KERNEL_LOCATION
 
 times 510-($-$$) db 0
 db 0x55, 0xaa
